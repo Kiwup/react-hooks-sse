@@ -30,7 +30,6 @@ export const createSourceManager = ({ endpoint, onError, options = {} }) => {
       state.listenersByName.set(name, listeners);
 
       state.source.addEventListener(name, listener);
-      state.source.addEventListener('error', listener);
     },
     removeEventListener(name, listener) {
       const listeners = state.listenersByName.get(name) || new Set();
