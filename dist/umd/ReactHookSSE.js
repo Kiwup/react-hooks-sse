@@ -1695,11 +1695,59 @@
     };
   }
 
-  var createSourceManager = function createSourceManager(_ref) {
-    var endpoint = _ref.endpoint,
-        onError = _ref.onError,
-        _ref$options = _ref.options,
-        options = _ref$options === void 0 ? {} : _ref$options;
+  /* eslint-disable no-param-reassign */
+  var closedConnectionHandler = /*#__PURE__*/function () {
+    var _ref = _asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee(err, onError, endpoint, options, src, listenersByName) {
+      var _yield$onError, isConnected;
+
+      return regenerator.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              if (!(err.target.readyState === 2)) {
+                _context.next = 6;
+                break;
+              }
+
+              _context.next = 3;
+              return onError();
+
+            case 3:
+              _yield$onError = _context.sent;
+              isConnected = _yield$onError.isConnected;
+
+              if (isConnected) {
+                src = new window.EventSource(endpoint, options); // eslint-disable-next-line no-shadow
+
+                src.onerror = function (err) {
+                  return closedConnectionHandler(err, onError, endpoint, options, src, listenersByName);
+                };
+
+                listenersByName.forEach(function (listener, name) {
+                  src.addEventListener(name, listener.entries().next().value[0]);
+                });
+              } else {
+                window.location.reload();
+              }
+
+            case 6:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee);
+    }));
+
+    return function closedConnectionHandler(_x, _x2, _x3, _x4, _x5, _x6) {
+      return _ref.apply(this, arguments);
+    };
+  }();
+
+  var createSourceManager = function createSourceManager(_ref2) {
+    var endpoint = _ref2.endpoint,
+        onError = _ref2.onError,
+        _ref2$options = _ref2.options,
+        options = _ref2$options === void 0 ? {} : _ref2$options;
     var state = {
       source: null,
       listenersByName: new Map()
@@ -1712,42 +1760,9 @@
         if (!state.listenersByName.size) {
           state.source = new window.EventSource(endpoint, options);
 
-          state.source.onerror = /*#__PURE__*/function () {
-            var _ref2 = _asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee(err) {
-              var isConnected;
-              return regenerator.wrap(function _callee$(_context) {
-                while (1) {
-                  switch (_context.prev = _context.next) {
-                    case 0:
-                      if (!(err.target.readyState === 2)) {
-                        _context.next = 5;
-                        break;
-                      }
-
-                      _context.next = 3;
-                      return onError();
-
-                    case 3:
-                      isConnected = _context.sent;
-
-                      if (isConnected) {
-                        state.source = new window.EventSource(endpoint, options);
-                      } else {
-                        document.location.reload();
-                      }
-
-                    case 5:
-                    case "end":
-                      return _context.stop();
-                  }
-                }
-              }, _callee);
-            }));
-
-            return function (_x) {
-              return _ref2.apply(this, arguments);
-            };
-          }();
+          state.source.onerror = function (err) {
+            return closedConnectionHandler(err, onError, endpoint, options, state.source, state.listenersByName);
+          };
         }
 
         var listeners = state.listenersByName.get(name) || new Set();
