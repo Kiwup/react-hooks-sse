@@ -6,10 +6,11 @@ export const SSEContext = createContext(null);
 
 export const SSEConsumer = SSEContext.Consumer;
 
-export const SSEProvider = ({ endpoint, options, ...props }) => {
+export const SSEProvider = ({ endpoint, onError, options, ...props }) => {
   const [source] = useState(() =>
     createSourceManager({
       endpoint,
+      onError,
       options,
     })
   );

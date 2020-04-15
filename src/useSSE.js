@@ -24,7 +24,6 @@ export const useSSE = (
     };
 
     source.addEventListener(eventName, listener);
-
     return () => {
       source.removeEventListener(eventName, listener);
     };
